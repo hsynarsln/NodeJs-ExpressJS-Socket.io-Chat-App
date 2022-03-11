@@ -3,6 +3,7 @@ const express = require('express');
 const http = require('http'); //! after socket.io
 const { Server } = require('socket.io'); //! after express
 const Filter = require('bad-words');
+const { generateMessage, generateLocationMessage } = require('./utils/messages');
 
 const app = express();
 const server = http.createServer(app); //! after socket.io
@@ -27,9 +28,27 @@ io.on('connection', socket => {
   //   io.emit('countUpdated', count);
   // });
 
-  socket.emit('message', 'welcome!');
+  // socket.emit('message', 'welcome!');
+  //! adding  date
+  // socket.emit('message', {
+  //   text: 'Welcome!',
+  //   createdAt: new Date().getTime()
+  // });
 
-  socket.broadcast.emit('message', 'new user joined!');
+  // socket.emit('message', generateMessage('Welcome!'));
+
+  // socket.broadcast.emit('message', generateMessage('new user joined!'));
+
+  socket.on('join', ({ username, room }) => {
+    // console.log({ username, room });
+    socket.join(room);
+
+    socket.emit('message', generateMessage('Welcome!'));
+
+    //! sadece aynı odaya girenlere welcome ve join mesajı gönder
+    socket.broadcast.to(room).emit('message', generateMessage(`${username} has joined!`));
+    //! io.to.emit, socket.broadcast.to.emit --> belirli bir odanın üyeleriyle nasıl iletişim kuracağız
+  });
 
   socket.on('sendMessage', (message, callback) => {
     //! bad-words
@@ -39,19 +58,19 @@ io.on('connection', socket => {
       return callback('Profanity is not allowed!');
     }
 
-    io.emit('message', message);
+    io.to('Ank').emit('message', generateMessage(message));
     callback('delivered!'); //! this message was delivered
   });
 
   //! send location
   socket.on('sendLocation', (coords, callback) => {
-    io.emit('locationMessage', `https://google.com/maps?q=${coords.latitude},${coords.longitude}`);
+    io.emit('locationMessage', generateLocationMessage(coords));
     callback();
   });
 
   //! disconnect event
   socket.on('disconnect', () => {
-    io.emit('message', 'user left');
+    io.emit('message', generateMessage('user left'));
   });
 });
 
