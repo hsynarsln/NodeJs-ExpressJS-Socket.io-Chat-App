@@ -1,16 +1,6 @@
 
 <h1 align="center">Chat App</h1>
 
-<div align="center">
-  <h3>
-
-    <a href="https://{your-url-to-the-solution}">
-      Project
-    </a>
- 
-  </h3>
-</div>
-
 ### Built With
 
 <!-- This section should list any major frameworks that you built your project using. Here are a few examples.-->
